@@ -8,13 +8,13 @@ include 'mini-ai-model-ngram'
 include 'mini-ai-server'
 include 'mini-ai-cli'
 
-// 새로운 AI Process 단계별 모듈
+// AI Process 단계별 모듈 (STEP 1-8)
 include 'step1-tokenization'
 include 'step2-context'
 include 'step3-probability'
 include 'step4-sampling'
 include 'step5-embedding'
 include 'step6-transformer'
-include 'step5-generation'
-include 'step6-postprocess'
+include 'step7-generation'
+include 'step8-postprocess'
 include 'pipeline'

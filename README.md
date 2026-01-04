@@ -67,8 +67,8 @@ AI: "오늘 날씨 좋다고 생각해요!"
 | 4 | 샘플링 | 왜 매번 답이 다른가? | `./gradlew :step4-sampling:run` |
 | 5 | **Embedding** | 단어를 숫자로 어떻게 표현하는가? | `./gradlew :step5-embedding:run` |
 | 6 | **Transformer** | AI가 문맥을 어떻게 이해하는가? | `./gradlew :step6-transformer:run` |
-| 7 | 생성 루프 | 한 번에 쓰는가, 한 글자씩 쓰는가? | `./gradlew :step5-generation:run` |
-| 8 | 후처리 | 왜 가끔 거절하는가? | `./gradlew :step6-postprocess:run` |
+| 7 | 생성 루프 | 한 번에 쓰는가, 한 글자씩 쓰는가? | `./gradlew :step7-generation:run` |
+| 8 | 후처리 | 왜 가끔 거절하는가? | `./gradlew :step8-postprocess:run` |
 
 ---
 
@@ -124,8 +124,8 @@ code-ai-part1-basics/
 ├── step4-sampling/         # 샘플링 (Temperature, Top-k)
 ├── step5-embedding/        # ⭐ Embedding (벡터 표현)
 ├── step6-transformer/      # ⭐ Transformer (Attention)
-├── step5-generation/       # 생성 루프
-├── step6-postprocess/      # 후처리
+├── step7-generation/       # 생성 루프
+├── step8-postprocess/      # 후처리
 ├── pipeline/               # 전체 파이프라인
 ├── mini-ai-core/           # 코어 인터페이스
 ├── mini-ai-model-ngram/    # N-gram 모델

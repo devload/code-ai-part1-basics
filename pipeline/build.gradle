@@ -14,6 +14,6 @@ dependencies {
     implementation project(':step2-context')
     implementation project(':step3-probability')
     implementation project(':step4-sampling')
-    implementation project(':step5-generation')
-    implementation project(':step6-postprocess')
+    implementation project(':step7-generation')
+    implementation project(':step8-postprocess')
 }
