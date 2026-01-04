@@ -1,214 +1,370 @@
-# Mission: Mini AI Full-Stack (Java) — 과정 중심 개발 (교육자료용)
+# Mission: AI Process 학습 시리즈
 
-## 최종 목표(변하지 않는 큰 그림)
-자바로 "토큰화 → n-gram(Bigram) 학습/서빙 → REST API → CLI"를 직접 구현하면서,
-각 단계마다 문서/데모/커밋을 남겨 교육 자료로 쓸 수 있게 만든다.
+## 프로젝트 비전
+
+**"AI가 어떻게 동작하는가?"를 프로세스 관점에서 이해하는 교육용 프로젝트**
+
+단순히 AI를 "사용"하는 것이 아니라, AI 내부에서 일어나는 과정을 단계별로 직접 구현하고 시각화하여 이해한다.
+
+---
+
+## 전체 시리즈 구성
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    AI Process 학습 시리즈                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Part 1: AI 기초 프로세스 (현재)                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ 토큰화 → 컨텍스트 → 확률계산 → 샘플링 → 생성루프 → 후처리  │   │
+│  │                                                          │   │
+│  │ "AI가 글을 생성하는 기본 원리"                            │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                           │                                     │
+│                           ▼                                     │
+│  Part 2: 코드 이해 프로세스                                      │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ 파싱 → AST → 의미분석 → 패턴매칭 → 이슈탐지 → 점수화      │   │
+│  │                                                          │   │
+│  │ "AI가 코드를 이해하고 분석하는 원리"                       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                           │                                     │
+│                           ▼                                     │
+│  Part 3: AI 서비스 프로세스                                      │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ API호출 → 프롬프트구성 → LLM처리 → 응답파싱 → 액션실행    │   │
+│  │                                                          │   │
+│  │ "AI를 실제 서비스로 연결하는 원리"                         │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+# Part 1: AI 기초 프로세스
+
+## 목표
+
+**AI가 프롬프트를 받아 응답을 생성하기까지의 내부 과정을 이해한다**
+
+```
+사용자: "오늘 날씨 어때?"
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 1: 토큰화                                               │
+│ "오늘 날씨 어때?" → [오늘] [날씨] [어때] [?]                  │
+└─────────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 2: 컨텍스트 구성                                        │
+│ [시스템 프롬프트] + [히스토리] + [사용자 입력]                │
+└─────────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 3: 확률 계산 (N-gram / Attention)                       │
+│ 다음 토큰 후보: "오늘"(35%), "지금"(25%), "현재"(20%)...     │
+└─────────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 4: 샘플링                                               │
+│ Temperature, Top-k, Top-p 적용 → "오늘" 선택                 │
+└─────────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 5: 생성 루프                                            │
+│ "오늘" → "오늘 날씨는" → "오늘 날씨는 맑고" → ... → [END]    │
+└─────────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 6: 후처리                                               │
+│ 안전 필터 체크 → 포맷 정리 → 최종 출력                       │
+└─────────────────────────────────────────────────────────────┘
+        │
+        ▼
+AI: "오늘 날씨는 맑고 화창해요!"
+```
+
+---
+
+## Part 1 학습 단계
+
+### STEP 1: 토큰화 (Tokenization)
+
+**핵심 질문**: 왜 문장을 조각내는가?
+
+| 학습 내용 | 구현 |
+|----------|------|
+| 토큰이란 무엇인가 | WhitespaceTokenizer |
+| 왜 모델은 문장을 직접 이해 못하나 | encode/decode 구현 |
+| 서브워드 토큰화 (BPE) | CodeTokenizer |
+| 토큰 수 = 비용 | 토큰 카운팅 |
+
+**시각화**: 문장 → 토큰 → ID 변환 애니메이션
+
+---
+
+### STEP 2: 컨텍스트 구성 (Context Assembly)
+
+**핵심 질문**: AI는 뭘 보고 답하는가?
+
+| 학습 내용 | 구현 |
+|----------|------|
+| 시스템 프롬프트 역할 | ContextBuilder |
+| 대화 히스토리 관리 | ConversationMemory |
+| 컨텍스트 윈도우 제한 | TokenLimiter |
+| 프롬프트 템플릿 | PromptTemplate |
+
+**시각화**: 컨텍스트 구성 요소 시각화
+
+---
+
+### STEP 3: 확률 계산 (Probability Calculation)
+
+**핵심 질문**: 다음 단어를 어떻게 예측하는가?
+
+| 학습 내용 | 구현 |
+|----------|------|
+| 조건부 확률 P(next\|prev) | BigramModel |
+| N-gram 모델 | TrigramModel, NgramModel |
+| 스무딩 (Kneser-Ney) | SmoothingStrategy |
+| Attention 개념 소개 | (문서만, 구현은 Part 2+) |
+
+**시각화**: 확률 분포 그래프, Attention 히트맵
+
+---
+
+### STEP 4: 샘플링 (Sampling)
+
+**핵심 질문**: 왜 매번 답이 다른가?
+
+| 학습 내용 | 구현 |
+|----------|------|
+| Greedy vs Sampling | Sampler |
+| Temperature 효과 | temperature 파라미터 |
+| Top-k 필터링 | topK 파라미터 |
+| Top-p (Nucleus) 샘플링 | topP 파라미터 |
+| 재현성 (Seed) | seed 파라미터 |
+
+**시각화**: Temperature별 확률 분포 변화
+
+---
+
+### STEP 5: 생성 루프 (Generation Loop)
+
+**핵심 질문**: 한 번에 쓰는가, 한 글자씩 쓰는가?
+
+| 학습 내용 | 구현 |
+|----------|------|
+| Auto-regressive 생성 | Generator |
+| 종료 조건 (EOS, max_tokens) | StopCondition |
+| Stop Sequences | stopSequences 처리 |
+| 스트리밍 출력 | StreamingGenerator |
+
+**시각화**: 토큰이 하나씩 추가되는 애니메이션
+
+---
+
+### STEP 6: 후처리 (Post-processing)
+
+**핵심 질문**: 왜 가끔 거절하는가?
+
+| 학습 내용 | 구현 |
+|----------|------|
+| 안전 필터 | SafetyFilter |
+| 콘텐츠 정책 | ContentPolicy |
+| 출력 포맷팅 | OutputFormatter |
+| 응답 구조화 | ResponseParser |
+
+**시각화**: 필터 체크리스트
+
+---
+
+## 프로젝트 구조
+
+```
+ai-process-part1/
+├── step1-tokenization/
+│   ├── Tokenizer.java
+│   ├── WhitespaceTokenizer.java
+│   ├── CodeTokenizer.java
+│   └── TokenizerDemo.java
+│
+├── step2-context/
+│   ├── ContextBuilder.java
+│   ├── ConversationMemory.java
+│   ├── PromptTemplate.java
+│   └── ContextDemo.java
+│
+├── step3-probability/
+│   ├── BigramModel.java
+│   ├── TrigramModel.java
+│   ├── NgramModel.java
+│   ├── SmoothingStrategy.java
+│   └── ProbabilityDemo.java
+│
+├── step4-sampling/
+│   ├── Sampler.java
+│   ├── TemperatureSampler.java
+│   ├── TopKSampler.java
+│   ├── TopPSampler.java
+│   └── SamplingDemo.java
+│
+├── step5-generation/
+│   ├── Generator.java
+│   ├── AutoRegressiveGenerator.java
+│   ├── StopCondition.java
+│   └── GenerationDemo.java
+│
+├── step6-postprocess/
+│   ├── SafetyFilter.java
+│   ├── OutputFormatter.java
+│   └── PostprocessDemo.java
+│
+├── pipeline/
+│   ├── AIPipeline.java          # 전체 파이프라인 통합
+│   └── PipelineDemo.java        # 전체 프로세스 시각화
+│
+├── cli/
+│   └── ProcessCli.java          # CLI 도구
+│
+├── docs/
+│   ├── STEP-01-토큰화.md
+│   ├── STEP-02-컨텍스트.md
+│   ├── STEP-03-확률계산.md
+│   ├── STEP-04-샘플링.md
+│   ├── STEP-05-생성루프.md
+│   ├── STEP-06-후처리.md
+│   └── demo/
+│       └── (각 단계별 실행 로그)
+│
+└── visualization/
+    └── (시각화 자료)
+```
+
+---
+
+## CLI 사용 예시
+
+```bash
+# 전체 파이프라인 실행 (각 단계 시각화)
+$ ai-process run "오늘 날씨 어때?" --verbose
+
+# 개별 단계 실행
+$ ai-process tokenize "오늘 날씨 어때?"
+$ ai-process context --system "친절한 AI" --user "오늘 날씨 어때?"
+$ ai-process probability --prev "오늘" --model trigram
+$ ai-process sample --distribution "오늘:0.35,지금:0.25" --temperature 0.7
+$ ai-process generate --prompt "오늘 날씨" --max-tokens 20
+```
+
+---
 
 ## 핵심 원칙
-- 한 번에 완성하지 않는다. 반드시 단계별로 만든다.
-- 매 단계마다 다음 산출물이 남아야 한다:
-  - (1) 문서: docs/STEP-XX.md
-  - (2) 코드: 커밋 단위
-  - (3) 데모 로그: docs/demo/STEP-XX.log (실행 커맨드 + 출력)
-- 매 단계 끝에서 "왜 이렇게 했는지"를 한 문단으로 기록한다.
-- 설계는 교체 가능하도록(Tokenizer/Model/Trainer 인터페이스) 처음부터 잡는다.
-- MVP 모델은 Bigram만 구현한다. Trigram은 "설계 자리만" 확보한다.
+
+1. **프로세스 중심**: 코드보다 "과정"을 이해하는 것이 목표
+2. **시각화 필수**: 각 단계마다 시각적으로 보여주기
+3. **단계별 진행**: 한 번에 완성하지 않고, 단계별로 만들기
+4. **문서 필수**: 각 단계마다 docs/STEP-XX.md 작성
+5. **데모 필수**: 각 단계마다 실행 가능한 데모 제공
 
 ---
 
-## Repository 규칙
-- Gradle 멀티모듈
-- 모듈:
-  - mini-ai-core
-  - mini-ai-tokenizer-simple
-  - mini-ai-model-ngram
-  - mini-ai-server
-  - mini-ai-cli
-- 각 스텝 끝에 tag: step-01, step-02 … 로 남긴다.
+## 산출물 체크리스트
+
+각 STEP 완료 시:
+- [ ] docs/STEP-XX.md 문서
+- [ ] 해당 단계 코드 구현
+- [ ] 데모 실행 가능
+- [ ] CLI에서 해당 단계 실행 가능
+- [ ] 시각화 자료 (다이어그램 또는 출력)
 
 ---
 
-# Step 0. 뼈대 만들기 (프로젝트 골격 + 학습 목표 세팅)
-## 학습 포인트
-- "교체 가능한 구조"가 무엇인지 감을 잡는다.
+# Part 2: 코드 이해 프로세스 (예정)
 
-## 구현 범위
-- Gradle 멀티모듈 생성
-- mini-ai-core에 인터페이스/DTO만 정의 (구현 X)
-  - Tokenizer
-  - LanguageModel (or NGramModel)
-  - Trainer
-  - Usage 타입
-  - GenerateRequest/Response
+## 목표
 
-## 산출물
-- docs/STEP-00.md: 전체 아키텍처 개요(그림 1장 ASCII로라도)
-- README.md: Step별 실행 흐름 목차만 작성
-- docs/demo/STEP-00.log: gradle 빌드 성공 로그
+**AI가 코드를 분석하고 이해하는 과정을 단계별로 구현**
 
-## DoD
-- ./gradlew build 성공
-- core 모듈에 "구현 없는 인터페이스"만 존재
+```
+코드 입력 → 파싱 → AST → 의미분석 → 패턴매칭 → 이슈탐지 → 점수화
+```
 
----
+### 학습 단계 (예정)
 
-# Step 1. Tokenizer 만들기 (가장 작은 성공)
-## 학습 포인트
-- 텍스트가 "조각"으로 바뀌는 순간을 직접 만든다.
-
-## 구현 범위
-- WhitespaceTokenizer 구현 (encode/decode)
-- tokenize 명령(로컬 테스트용)까지는 아직 CLI가 아니라 JUnit 테스트로 확인
-
-## 산출물
-- docs/STEP-01.md: 토큰이 무엇인지 + 공백 토크나이저 한계
-- docs/demo/STEP-01.log: 단위 테스트 실행 로그(입력/출력 예시 포함)
-
-## DoD
-- encode/decode round-trip 테스트 통과
-- "오늘은 날씨가 좋다" 토큰 분해 예시가 문서에 포함
+| STEP | 제목 | 핵심 질문 |
+|------|------|----------|
+| 01 | 파싱 | 코드를 어떻게 읽는가? |
+| 02 | AST | 코드의 구조를 어떻게 파악하는가? |
+| 03 | 의미 분석 | 변수/타입을 어떻게 추적하는가? |
+| 04 | 패턴 매칭 | 나쁜 코드를 어떻게 찾는가? |
+| 05 | 이슈 탐지 | 버그/보안 문제를 어떻게 발견하는가? |
+| 06 | 점수화 | 코드 품질을 어떻게 측정하는가? |
 
 ---
 
-# Step 2. Bigram 학습(Train) 구현 (학습=세기)
-## 학습 포인트
-- 학습은 "카운트 테이블 만들기"라는 감각을 잡는다.
+# Part 3: AI 서비스 프로세스 (예정)
 
-## 구현 범위
-- BigramTrainer 구현
-  - 입력: 텍스트 파일 경로
-  - 처리: 토큰화 후 prev->next 카운트 생성
-  - 출력: BigramArtifact(JSON) 저장
-- artifact 형식 확정 (counts, meta, vocab 등)
+## 목표
 
-## 산출물
-- docs/STEP-02.md: bigram이 무엇인지 + 카운트 예시 표(간단히)
-- docs/demo/STEP-02.log:
-  - corpus 샘플 파일 생성
-  - trainer 실행 커맨드
-  - artifact 일부 출력(상위 5개 정도)
+**AI를 실제 서비스로 연결하는 과정을 단계별로 구현**
 
-## DoD
-- artifact 파일이 생성되고, counts가 JSON으로 저장됨
-- corpus가 달라도 재학습 가능
+```
+요청 → API호출 → 프롬프트구성 → LLM처리 → 응답파싱 → 액션실행 → 피드백
+```
 
----
+### 학습 단계 (예정)
 
-# Step 3. Bigram 생성(Generate) 구현 (서빙=다음 토큰 선택)
-## 학습 포인트
-- "다음 토큰 예측 루프"를 직접 손으로 만든다.
-
-## 구현 범위
-- BigramModel (artifact 로드)
-- Sampler 구현
-  - topK
-  - temperature
-  - 랜덤 시드 옵션(재현성)
-- generate(req) 구현
-  - prompt 토큰화
-  - maxTokens만큼 반복 생성
-  - stopSequences(간단 구현)
-
-## 산출물
-- docs/STEP-03.md: 생성 루프 설명(의사코드 포함)
-- docs/demo/STEP-03.log:
-  - 동일 prompt에 seed 고정 시 결과 동일
-  - temperature/topK 바꿨을 때 결과 변화 비교
-
-## DoD
-- 모델이 실제 텍스트를 생성함(품질 상관 X)
-- seed 고정 시 재현됨
+| STEP | 제목 | 핵심 질문 |
+|------|------|----------|
+| 01 | API 호출 | LLM API는 어떻게 사용하는가? |
+| 02 | 프롬프트 | 좋은 프롬프트는 어떻게 만드는가? |
+| 03 | LLM 라우팅 | 어떤 모델을 언제 쓰는가? |
+| 04 | 응답 파싱 | AI 응답을 어떻게 처리하는가? |
+| 05 | 액션 실행 | AI가 도구를 어떻게 사용하는가? |
+| 06 | 피드백 루프 | 결과를 어떻게 개선하는가? |
 
 ---
 
-# Step 4. Usage(토큰 카운팅) 붙이기 (비용 감각 만들기)
-## 학습 포인트
-- "왜 토큰이 비용 단위인지"를 시스템이 직접 보여주게 만든다.
+## TODO
 
-## 구현 범위
-- UsageMeter 구현
-  - inputTokens = encode(prompt).size
-  - outputTokens = 생성된 토큰 수
-- GenerateResponse에 usage 포함
+### Part 1 작업
 
-## 산출물
-- docs/STEP-04.md: 토큰 카운트가 왜 중요한지(대화 길이/비용/제한)
-- docs/demo/STEP-04.log:
-  - 같은 prompt에 maxTokens 바꿔서 totalTokens 변화 확인
+- [x] 기존 코드를 새 구조로 재배치
+- [x] step1-tokenization 완성 (기존 코드 활용)
+- [x] step2-context 구현
+- [x] step3-probability 완성 (기존 N-gram 활용)
+- [x] step4-sampling 완성 (기존 Sampler 활용)
+- [x] step5-generation 완성 (기존 Generator 활용)
+- [x] step6-postprocess 구현
+- [x] pipeline 통합
+- [ ] CLI 업데이트 (process 명령어 추가)
+- [ ] 각 단계별 문서 작성
+- [ ] 시각화 자료 추가
 
-## DoD
-- 응답에 usage가 항상 포함
-- input/output/total이 일관됨
+### Part 2 작업
 
----
+- [ ] Part 1 fork
+- [ ] 코드 분석 프로세스 구현
+- [ ] 문서 작성
 
-# Step 5. Server 만들기 (Spring Boot API로 감싸기)
-## 학습 포인트
-- 모델을 "서빙" 형태로 제공하는 구조를 익힌다.
+### Part 3 작업
 
-## 구현 범위
-- mini-ai-server Spring Boot
-- POST /v1/train
-- POST /v1/generate
-- latencyMs 측정하여 포함
-- artifact 경로 지정 방식(기본값 포함)
-
-## 산출물
-- docs/STEP-05.md: API 설계 이유 + 요청/응답 예시
-- docs/demo/STEP-05.log:
-  - curl로 train/generate 호출
-  - 응답 JSON 캡처
-
-## DoD
-- 서버 실행 후 curl로 generate 동작
-- usage/latency/model 정보가 응답에 포함
+- [ ] Part 2 fork
+- [ ] AI 서비스 프로세스 구현
+- [ ] 문서 작성
 
 ---
 
-# Step 6. CLI 만들기 (서버를 쓰는 사용자 경험)
-## 학습 포인트
-- "CLI로 AI를 쓰는 흐름"을 직접 만든다.
+## 참고
 
-## 구현 범위
-- picocli 기반 mini-ai-cli
-- 명령어:
-  - mini-ai train --corpus <path>
-  - mini-ai run -p "<prompt>" ...
-  - mini-ai chat (REPL)
-  - mini-ai tokenize "<text>"
-- CLI는 HTTP로 server 호출
-
-## 산출물
-- docs/STEP-06.md: CLI UX 설계(왜 이 명령어들인지)
-- docs/demo/STEP-06.log:
-  - train -> run -> chat 시나리오 실행 기록
-
-## DoD
-- CLI만으로 학습/생성/채팅이 가능
-- tokenize 결과가 즉시 확인됨
-
----
-
-# Step 7. 확장 설계 자리 확보 (Trigram 훅만)
-## 학습 포인트
-- "교체 가능한 구조"가 실제로 어떻게 확장되는지 보여준다.
-
-## 구현 범위
-- TrigramModel/Trainer는 구현하지 않아도 됨
-- 다만 인터페이스와 artifact 확장 포인트 문서화
-  - backoff, interpolation 옵션이 들어갈 위치 표시
-
-## 산출물
-- docs/STEP-07.md: trigram이 왜 중요한지(문장성/희소성) + 다음 확장 로드맵(코드 자리 기준)
-- docs/demo/STEP-07.log: N/A (문서 중심)
-
-## DoD
-- 코드에 "Trigram을 끼울 자리"가 실제로 존재
-- artifact 포맷이 확장 가능한 형태로 설명됨
-
----
-
-## 전체 완료 기준
-- step-00 ~ step-07 태그가 존재
-- docs/STEP-XX.md + docs/demo/STEP-XX.log가 모두 존재
-- README에 "이 저장소는 과정 중심이며, step을 따라가면 된다"가 명확히 적혀 있음
+- 기존 코드: mini-ai-core, mini-ai-tokenizer-simple, code-ai-tokenizer, mini-ai-model-ngram
+- GitHub: https://github.com/devload/code-ai-part1-basics

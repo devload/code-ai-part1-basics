@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+description = 'STEP 3: 확률 계산 - 다음 단어를 어떻게 예측하는가'
+
+application {
+    mainClass = 'com.aiprocess.step3.ProbabilityDemo'
+}
+
+dependencies {
+    implementation project(':step1-tokenization')
+}

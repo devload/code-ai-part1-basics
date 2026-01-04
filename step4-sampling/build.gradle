@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+description = 'STEP 4: 샘플링 - 왜 매번 답이 다른가'
+
+application {
+    mainClass = 'com.aiprocess.step4.SamplingDemo'
+}
+
+dependencies {
+    implementation project(':step3-probability')
+}

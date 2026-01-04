@@ -1,8 +1,18 @@
-rootProject.name = 'code-ai'
+rootProject.name = 'ai-process-part1'
 
+// 기존 모듈 (core)
 include 'mini-ai-core'
 include 'mini-ai-tokenizer-simple'
 include 'code-ai-tokenizer'
 include 'mini-ai-model-ngram'
 include 'mini-ai-server'
 include 'mini-ai-cli'
+
+// 새로운 AI Process 단계별 모듈
+include 'step1-tokenization'
+include 'step2-context'
+include 'step3-probability'
+include 'step4-sampling'
+include 'step5-generation'
+include 'step6-postprocess'
+include 'pipeline'

@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+description = 'STEP 1: 토큰화 - AI가 문장을 조각내는 과정'
+
+application {
+    mainClass = 'com.aiprocess.step1.TokenizationDemo'
+}
+
+dependencies {
+}

@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+description = 'AI Process Pipeline - 전체 파이프라인 통합'
+
+application {
+    mainClass = 'com.aiprocess.pipeline.PipelineDemo'
+}
+
+dependencies {
+    implementation project(':step1-tokenization')
+    implementation project(':step2-context')
+    implementation project(':step3-probability')
+    implementation project(':step4-sampling')
+    implementation project(':step5-generation')
+    implementation project(':step6-postprocess')
+}

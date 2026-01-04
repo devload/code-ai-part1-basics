@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+description = 'STEP 6: 후처리 - 왜 가끔 거절하는가'
+
+application {
+    mainClass = 'com.aiprocess.step6.PostprocessDemo'
+}
+
+dependencies {
+}

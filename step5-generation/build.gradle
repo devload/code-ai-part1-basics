@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+description = 'STEP 5: 생성 루프 - 한 번에 쓰는가, 한 글자씩 쓰는가'
+
+application {
+    mainClass = 'com.aiprocess.step5.GenerationDemo'
+}
+
+dependencies {
+    implementation project(':step1-tokenization')
+    implementation project(':step3-probability')
+    implementation project(':step4-sampling')
+}

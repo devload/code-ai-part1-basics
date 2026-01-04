@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+description = 'STEP 2: 컨텍스트 구성 - AI가 뭘 보고 답하는가'
+
+application {
+    mainClass = 'com.aiprocess.step2.ContextDemo'
+}
+
+dependencies {
+    implementation project(':step1-tokenization')
+}
