@@ -76,7 +76,7 @@ public class ContextDemo {
         System.out.println("  ┌───────────────────────────────────────────┐");
         System.out.println("  │ 문제: 컨텍스트 윈도우 제한                  │");
         System.out.println("  │ - GPT-4: 8K ~ 128K tokens                 │");
-        System.out.println("  │ - 대화가 길어지면 오래된 내용은 "잊어버림"  │");
+        System.out.println("  │ - 대화가 길어지면 오래된 내용은 '잊어버림'  │");
         System.out.println("  └───────────────────────────────────────────┘");
         System.out.println();
 

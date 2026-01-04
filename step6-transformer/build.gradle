@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+description = 'STEP 6: Transformer - Attention 메커니즘 이해'
+
+application {
+    mainClass = 'com.aiprocess.step6.TransformerDemo'
+}
+
+dependencies {
+    implementation project(':step5-embedding')
+}

@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+description = 'STEP 5: Embedding - 토큰을 벡터로 변환'
+
+application {
+    mainClass = 'com.aiprocess.step5.EmbeddingDemo'
+}
+
+dependencies {
+    implementation project(':step1-tokenization')
+}

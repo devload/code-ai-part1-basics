@@ -13,15 +13,17 @@ AI 모델이 어떻게 동작하는지 핵심 원리를 단계별로 학습합�
 | [02](STEP-02.md) | Bigram 학습 | 학습=카운팅, Artifact |
 | [03](STEP-03.md) | 텍스트 생성 | 생성 루프, 샘플링 |
 | [04](STEP-04.md) | Usage 측정 | 토큰=비용, Input/Output |
-| [05](STEP-05.md) | Server 만들기 | REST API, Spring Boot |
-| [06](STEP-06.md) | CLI 만들기 | 사용자 인터페이스 |
+| [05](STEP-05.md) | Embedding | 벡터, 코사인 유사도 |
+| [06](STEP-06.md) | Transformer | Attention, Self-Attention |
+| [07](STEP-07.md) | Server 만들기 | REST API, Spring Boot |
+| [08](STEP-08.md) | CLI 만들기 | 사용자 인터페이스 |
 
 ---
 
 ## 전체 흐름
 
 ```
-토큰화 → 학습 → 생성 → 비용 → 서비스화
+토큰화 → 학습 → 생성 → 비용 → Embedding → Transformer → 서비스화
 ```
 
 ```
@@ -35,7 +37,11 @@ AI 모델이 어떻게 동작하는지 핵심 원리를 단계별로 학습합�
      ↓
 [STEP 4] 비용: Usage 측정
      ↓
-[STEP 5-6] 서비스: API / CLI
+[STEP 5] Embedding: 토큰 → 벡터
+     ↓
+[STEP 6] Transformer: Attention으로 문맥 이해
+     ↓
+[STEP 7-8] 서비스: API / CLI
      ↓
 [텍스트 출력]
 ```
@@ -44,15 +50,16 @@ AI 모델이 어떻게 동작하는지 핵심 원리를 단계별로 학습합�
 
 ## 핵심 키워드
 
-`토큰` `Bigram` `생성 루프` `샘플링` `temperature` `Usage`
+`토큰` `Bigram` `생성 루프` `샘플링` `temperature` `Usage` `Embedding` `Attention` `Transformer`
 
 ---
 
 ## 학습 후 할 수 있는 것
 
-- AI 모델이 입력을 처리하는 첫 단계(토큰화) 이해
+- AI 모델이 입력을 처리하는 과정 이해 (토큰화 → Embedding)
 - "학습"이 뭔지 직관적으로 이해
 - 텍스트 생성 원리를 코드로 구현
+- Transformer와 Attention의 핵심 원리 이해
 - API 비용 구조 이해
 
 ---
@@ -61,3 +68,4 @@ AI 모델이 어떻게 동작하는지 핵심 원리를 단계별로 학습합�
 
 - [Part 2: 도메인 데이터 분석](https://github.com/devload/code-ai-part2-analyzer)
 - [Part 3: AI 서비스 통합](https://github.com/devload/code-ai-part3-service)
+- [Part 4: 고급 주제](https://github.com/devload/code-ai-part4-advanced)
